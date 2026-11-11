@@ -1,0 +1,534 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Inside the Computer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F1EFEA; --panel:#FFFFFF; --ink:#1F2433; --muted:#5D6375; --line:#D3D0C7; --soft:#E6E3DB;
+  --hw:#C2571A; --sw:#2F6FDB; --os:#7B5EA7; --ok:#2E8B57; --warn:#B87410; --bad:#C0392B;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15171D; --panel:#1E212A; --ink:#E8E9EE; --muted:#A3A8B8; --line:#353A47; --soft:#2A2E39;
+    --hw:#EE8A4F; --sw:#6C9BF0; --os:#A98BD6; --ok:#4FB57D; --warn:#E2A23C; --bad:#E86A5C;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15171D; --panel:#1E212A; --ink:#E8E9EE; --muted:#A3A8B8; --line:#353A47; --soft:#2A2E39;
+  --hw:#EE8A4F; --sw:#6C9BF0; --os:#A98BD6; --ok:#4FB57D; --warn:#E2A23C; --bad:#E86A5C;
+}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.55 "Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif}
+h1,h2{font-family:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;line-height:1.1;margin:0}
+.wrap{max-width:1120px;margin:0 auto;padding:28px 16px 60px}
+header{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:16px;margin-bottom:18px}
+h1{font-size:clamp(2.2rem,6vw,3.6rem);font-weight:800;letter-spacing:-.02em}
+header p{margin:6px 0 0;color:var(--muted);max-width:56ch}
+.legend{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:.88rem;padding:4px 10px;border-radius:999px;background:var(--panel);border:1px solid var(--line)}
+.dot{width:10px;height:10px;border-radius:50%;flex:none;display:inline-block}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--bg);display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px;padding:10px 0;margin-bottom:14px;border-bottom:2px solid var(--line)}
+nav button{font:inherit;text-align:left;display:flex;flex-direction:column;background:var(--panel);border:2px solid var(--line);border-radius:10px;color:var(--ink);padding:7px 10px;cursor:pointer;line-height:1.2}
+nav button:hover{border-color:var(--ink)}
+nav button b{font-size:1rem}
+nav button span{font-size:.82rem;color:var(--muted)}
+nav button[aria-selected="true"]{background:var(--ink);border-color:var(--ink);color:var(--panel)}
+nav button[aria-selected="true"] span{color:var(--panel)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--sw);outline-offset:2px}
+.focus{background:var(--panel);border:2px solid var(--ink);border-radius:10px;padding:10px 14px;margin:0 0 14px}
+.focus small{display:block;color:var(--muted);font-size:.85rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.pager{display:flex;justify-content:space-between;gap:10px;margin:0 0 14px}
+.lab[hidden]{display:none!important}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:24px}
+@media (max-width:820px){.lab{grid-template-columns:1fr}}
+.intro h2{font-size:1.6rem;font-weight:800;margin-bottom:10px}
+.intro p{margin:0 0 12px;max-width:44ch}
+.talk{background:var(--panel);border-left:4px solid var(--ink);padding:12px 14px;border-radius:0 8px 8px 0}
+.talk ul{margin:6px 0 0;padding-left:18px}
+.note{font-size:.88rem;color:var(--muted)}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;min-width:0}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.btn{font:inherit;font-weight:700;font-size:.95rem;padding:9px 14px;border-radius:8px;border:2px solid var(--ink);background:var(--ink);color:var(--panel);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn.sm{padding:5px 10px;font-size:.88rem}
+.btn.on{background:var(--sw);border-color:var(--sw);color:#fff}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+label{font-size:.95rem}
+input[type=range]{accent-color:var(--sw);vertical-align:middle;width:min(260px,100%)}
+select{font:inherit;padding:5px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+h3{margin:14px 0 6px;font-size:1rem}
+.msg{min-height:1.5em;font-weight:700;margin:10px 0 0}
+/* layers */
+.layers{display:grid;gap:6px}
+.layer{display:grid;grid-template-columns:130px 1fr;gap:10px;align-items:center;border:2px solid var(--line);border-radius:10px;padding:8px 10px;transition:background .2s,border-color .2s}
+@media (max-width:520px){.layer{grid-template-columns:1fr}}
+.layer strong{display:flex;align-items:center;gap:6px;font-size:.95rem}
+.layer .items{display:flex;flex-wrap:wrap;gap:6px}
+.pill{font-size:.85rem;padding:3px 9px;border-radius:999px;background:var(--soft);border:1px solid var(--line);transition:background .2s,color .2s}
+.pill.lit{background:var(--c);color:#fff;border-color:var(--c)}
+.meter{height:22px;border-radius:6px;background:var(--soft);overflow:hidden;display:flex;border:1px solid var(--line)}
+.meter i{display:block;height:100%;transition:width .3s}
+.apps{display:flex;flex-wrap:wrap;gap:6px}
+/* cpu */
+.cpu{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:10px;align-items:stretch}
+@media (max-width:640px){.cpu{grid-template-columns:1fr}}
+.unit{border:2px solid var(--line);border-radius:10px;padding:10px;transition:border-color .2s,background .2s}
+.unit h4{margin:0 0 6px;font-size:.95rem}
+.unit.lit{border-color:var(--hw);background:color-mix(in srgb,var(--hw) 12%,transparent)}
+.cell{display:flex;justify-content:space-between;gap:8px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85rem;padding:3px 6px;border-radius:5px}
+.cell.lit{background:var(--hw);color:#fff}
+.reg{display:flex;justify-content:space-between;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.88rem;padding:3px 0;border-bottom:1px dashed var(--line)}
+.screen{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:1.6rem;text-align:right;background:var(--ink);color:var(--panel);border-radius:8px;padding:8px 12px;min-height:52px}
+.stepinfo{background:var(--soft);border-radius:8px;padding:10px 12px;margin-top:10px;min-height:3.2em}
+.stepinfo b{color:var(--hw)}
+/* bars */
+.bars{display:grid;gap:6px;margin-top:8px}
+.bar{display:grid;grid-template-columns:110px 1fr 70px;gap:8px;align-items:center;font-size:.9rem}
+.track{height:16px;background:var(--soft);border-radius:8px;overflow:hidden;display:flex}
+.track i{display:block;height:100%;transition:width .3s}
+.bar.cur{font-weight:700}
+/* laptops */
+.laps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:640px){.laps{grid-template-columns:1fr}}
+.lap{border:2px solid var(--line);border-radius:12px;padding:10px}
+.lap h4{margin:0 0 4px;font-size:1.05rem}
+.lap .spec{font-size:.82rem;color:var(--muted);margin-bottom:8px}
+.ind{font-size:.88rem;margin:6px 0 2px;display:flex;justify-content:space-between;gap:6px}
+.tag{font-size:.78rem;font-weight:700;padding:1px 7px;border-radius:999px;color:#fff;white-space:nowrap}
+.sl{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center;margin-bottom:6px;font-size:.92rem}
+/* cloud */
+table.r{border-collapse:collapse;width:100%;font-size:.88rem}
+table.r th,table.r td{border-bottom:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+table.r th{font-size:.8rem;color:var(--muted)}
+table.r td.who{font-weight:700;white-space:nowrap}
+.dept{color:var(--hw)} .prov{color:var(--sw)} .shared{color:var(--os)}
+.col-dim{opacity:.35}
+.events{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.out{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+@media (max-width:520px){.out{grid-template-columns:1fr}}
+.out div{border:2px solid var(--line);border-radius:10px;padding:10px;font-size:.92rem;min-height:5em}
+.out h4{margin:0 0 4px;font-size:.95rem}
+footer{margin-top:40px;color:var(--muted);font-size:.9rem}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+
+/* scene intros */
+.scene{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin:0 0 16px}
+.scene .bar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px}
+.scene .bar b{font-family:"Bricolage Grotesque",sans-serif;font-size:1.05rem}
+.scene svg{width:100%;height:auto;display:block;max-height:260px}
+.scene svg text{font-family:"Atkinson Hyperlegible",sans-serif;fill:var(--ink)}
+.scene .cap{margin:4px 0 0;color:var(--muted);font-size:.95rem;min-height:1.4em}
+@keyframes pop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes fill{from{width:0}to{width:var(--w)}}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:.25}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+@keyframes redden{to{fill:var(--bad)}}
+.an{opacity:0;transform-box:fill-box;transform-origin:center;animation:pop .45s ease-out forwards}
+.fd{opacity:0;animation:fade .5s ease-out forwards}
+@media (prefers-reduced-motion: reduce){.an,.fd{animation:none!important;opacity:1!important;transform:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <h1>Inside the Computer</h1>
+    <p>CCA102 / CST131 Computer Organisation, Tutorial 1. Three scenarios, small experiments. Play with each one, then discuss the question with your partner. There are no right or wrong buttons here.</p>
+  </div>
+  <div class="legend" aria-label="Colour key">
+    <span class="chip"><i class="dot" style="background:var(--hw)"></i>Hardware</span>
+    <span class="chip"><i class="dot" style="background:var(--os)"></i>Operating system</span>
+    <span class="chip"><i class="dot" style="background:var(--sw)"></i>Applications</span>
+  </div>
+</header>
+
+<nav role="tablist" aria-label="Scenario questions">
+  <button role="tab" aria-selected="true" data-lab="a1" data-s="1" data-q="1"><b>S1 · Q1</b><span>Hardware &amp; software</span></button>
+  <button role="tab" aria-selected="false" data-lab="a2" data-s="1" data-q="2"><b>S1 · Q2</b><span>Inside the CPU</span></button>
+  <button role="tab" aria-selected="false" data-lab="a3" data-s="1" data-q="3"><b>S1 · Q3</b><span>More cores?</span></button>
+  <button role="tab" aria-selected="false" data-lab="b" data-s="2" data-q="1"><b>S2 · Q1</b><span>Choose a laptop</span></button>
+  <button role="tab" aria-selected="false" data-lab="b" data-s="2" data-q="2"><b>S2 · Q2</b><span>Most cores = best?</span></button>
+  <button role="tab" aria-selected="false" data-lab="b" data-s="2" data-q="3"><b>S2 · Q3</b><span>Content creator</span></button>
+  <button role="tab" aria-selected="false" data-lab="c" data-s="3" data-q="1"><b>S3 · Q1</b><span>Move to cloud?</span></button>
+  <button role="tab" aria-selected="false" data-lab="c" data-s="3" data-q="2"><b>S3 · Q2</b><span>No more problems?</span></button>
+</nav>
+<div class="focus" id="focus"></div>
+<div class="pager" id="pager"></div>
+<div class="scene" id="scene"><div class="bar"><b id="sceneT"></b><button class="btn ghost sm" id="replay">Replay</button></div><div id="sceneSvg"></div><p class="cap" id="sceneCap"></p></div>
+
+<!-- S1 Q1 -->
+<section class="lab" id="a1">
+  <div class="intro">
+    <h2>Hardware and software, together</h2>
+    <p>Airene's laptop, as layers. Pick an action and watch which layers wake up, from the key she presses to the pixels on the screen.</p>
+    <p>Then open and close apps, and watch the memory bar.</p>
+    <div class="talk"><strong>Discuss with your partner</strong><ul><li>Could the software do anything without the hardware? And the reverse?</li><li>What sits between the apps and the hardware?</li><li>What happens to the laptop when memory is full?</li></ul></div>
+  </div>
+  <div class="stage">
+    <div class="row">
+      <button class="btn sm" data-act="type">Type a word in Word</button>
+      <button class="btn sm" data-act="music">Play a song in Spotify</button>
+      <button class="btn sm" data-act="calc">Calculate 12 + 7</button>
+      <button class="btn sm" data-act="web">Open a website</button>
+    </div>
+    <div class="layers" id="layers"></div>
+    <div class="stepinfo" id="a1info">Pick an action above.</div>
+    <h3>Memory (RAM: 8 GB)</h3>
+    <div class="apps" id="apps"></div>
+    <div class="row" style="margin-top:8px"><label>Chrome tabs <input type="range" id="tabs" min="1" max="30" value="8"> <b id="tabsV">8</b></label></div>
+    <div class="meter" id="ram"></div>
+    <p class="msg" id="ramMsg" role="status"></p>
+  </div>
+</section>
+
+<!-- S1 Q2 -->
+<section class="lab" id="a2" hidden>
+  <div class="intro">
+    <h2>How the CPU calculates</h2>
+    <p>Airene types two numbers in the Calculator. The app turns this into a tiny program in memory. Step through it and watch who does what.</p>
+    <p class="note">Each instruction goes through the same cycle: fetch it from memory, decode it, execute it.</p>
+    <div class="talk"><strong>Discuss with your partner</strong><ul><li>Which part decides what happens next, and which part actually adds?</li><li>Why do the numbers travel between memory and the CPU?</li><li>Draw this as a simple diagram in your own way.</li></ul></div>
+  </div>
+  <div class="stage">
+    <div class="row">
+      <label>A <input type="number" id="na" value="12" style="width:70px;font:inherit;padding:4px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--ink)"></label>
+      <select id="op" aria-label="Operation"><option value="ADD">+</option><option value="SUB">−</option><option value="MUL">×</option></select>
+      <label>B <input type="number" id="nb" value="7" style="width:70px;font:inherit;padding:4px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--ink)"></label>
+      <button class="btn" id="step">Next step</button>
+      <button class="btn ghost sm" id="cpuReset">Restart</button>
+    </div>
+    <div class="cpu">
+      <div class="unit" id="uMem"><h4>Main memory (RAM)</h4><div id="memCells"></div></div>
+      <div>
+        <div class="unit" id="uCU" style="margin-bottom:10px"><h4>Control Unit (CU)</h4>
+          <div class="reg"><span>PC (next address)</span><b id="rPC">0</b></div>
+          <div class="reg"><span>IR (current instruction)</span><b id="rIR">–</b></div>
+        </div>
+        <div class="unit" id="uALU"><h4>Arithmetic Logic Unit (ALU)</h4>
+          <div class="reg"><span>ACC (accumulator)</span><b id="rACC">0</b></div>
+          <div class="reg"><span>Operation</span><b id="rOP">–</b></div>
+        </div>
+      </div>
+      <div class="unit" id="uOut"><h4>Output (screen)</h4><div class="screen" id="scr">0</div><p class="note" style="margin:8px 0 0">The display is a separate device. The CPU only sends it the result.</p></div>
+    </div>
+    <div class="stepinfo" id="cpuInfo" aria-live="polite">Press <b>Next step</b> to start.</div>
+  </div>
+</section>
+
+<!-- S1 Q3 -->
+<section class="lab" id="a3" hidden>
+  <div class="intro">
+    <h2>Do more cores always help?</h2>
+    <p>Choose a task and change the number of cores. The bars show roughly how long the task takes.</p>
+    <p class="note">Some work can be split between cores, some cannot. The share that can be split is different for each task.</p>
+    <div class="talk"><strong>Discuss with your partner</strong><ul><li>For which tasks do extra cores help a lot? Hardly at all?</li><li>Look back at Airene's laptop. Was the CPU really her problem?</li></ul></div>
+  </div>
+  <div class="stage">
+    <div class="row" id="tasks"></div>
+    <div class="row"><label>Cores <input type="range" id="cores" min="1" max="16" value="4"> <b id="coresV">4</b></label></div>
+    <div class="row"><label><input type="checkbox" id="ramFull"> Memory is full (laptop swaps to disk)</label></div>
+    <p class="note" id="taskNote"></p>
+    <div class="bars" id="coreBars"></div>
+  </div>
+</section>
+
+<!-- S2 -->
+<section class="lab" id="b" hidden>
+  <div class="intro">
+    <h2>Amir's laptop</h2>
+    <p>Describe how Amir uses his laptop with the sliders. The cards show rough consequences for each laptop: money left, memory headroom, battery for a day, video export time, and storage after four years.</p>
+    <p class="note">These are simplified estimates for discussion, not real benchmarks. Every choice gives something up.</p>
+    <div class="talk" id="bTalk"></div>
+  </div>
+  <div class="stage">
+    <div class="sl"><label for="u_apps">Apps open at the same time</label><b id="u_appsV"></b><input type="range" id="u_apps" min="2" max="15" value="6" style="grid-column:1/-1;width:100%"></div>
+    <div class="sl"><label for="u_unplug">Hours a day away from a socket</label><b id="u_unplugV"></b><input type="range" id="u_unplug" min="0" max="10" value="5" style="grid-column:1/-1;width:100%"></div>
+    <div class="sl"><label for="u_video">Video editing, hours per week</label><b id="u_videoV"></b><input type="range" id="u_video" min="0" max="30" value="1" style="grid-column:1/-1;width:100%"></div>
+    <div class="row"><label>Video quality <select id="u_res"><option value="1">Full HD</option><option value="2.5">4K (high resolution)</option></select></label>
+      <button class="btn ghost sm" id="creator">Content creator mode</button>
+      <button class="btn ghost sm" id="student">Student mode</button></div>
+    <div class="laps" id="laps"></div>
+  </div>
+</section>
+
+<!-- S3 -->
+<section class="lab" id="c" hidden>
+  <div class="intro">
+    <h2>Local servers or cloud?</h2>
+    <p>First, see who is responsible for each part of the system under each option. Then trigger real-life events and compare what happens.</p>
+    <div class="talk" id="cTalk"></div>
+  </div>
+  <div class="stage">
+    <div class="row">
+      <span>Highlight:</span>
+      <button class="btn sm ghost" data-col="1">Local servers</button>
+      <button class="btn sm ghost" data-col="2">Cloud servers (IaaS)</button>
+      <button class="btn sm ghost" data-col="3">Cloud apps (SaaS)</button>
+      <button class="btn sm ghost" data-col="0">All</button>
+    </div>
+    <div style="overflow-x:auto"><table class="r" id="resp"></table></div>
+    <p class="note" style="margin-top:6px"><b class="dept">Department</b> · <b class="prov">Provider</b> (Google, Microsoft…) · <b class="shared">Shared</b></p>
+    <h3>What happens if…</h3>
+    <div class="events" id="events"></div>
+    <div class="out"><div><h4>With local servers</h4><span id="oLocal" class="note">Pick an event.</span></div><div><h4>With the cloud</h4><span id="oCloud" class="note">Pick an event.</span></div></div>
+  </div>
+</section>
+
+<footer>Discussion companion for CCA102 / CST131 Tutorial 1. Experiments to start the conversation, not answers to copy.</footer>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+
+// ---------- tabs ----------
+const QTEXT={
+ '1-1':'Hardware vs. Software: In this situation, what is the role of the hardware and software? How do they work together?',
+ '1-2':'Inside the Computer: How does the computer calculate and display the answer? Roles of the CPU, memory, Control Unit and ALU.',
+ '1-3':'Think Further: Will a laptop with more CPU cores always perform better than one with fewer cores?',
+ '2-1':'Which laptop would you recommend to Amir? Use at least two specifications, and say what he would sacrifice.',
+ '2-2':'Is the laptop with the most CPU cores always the best choice? What other information would you need?',
+ '2-3':'If Amir becomes a full-time content creator editing high-resolution videos, would your recommendation stay the same?',
+ '3-1':'Would you support moving to cloud computing? Consider at least one benefit, one risk and one responsibility the department keeps.',
+ '3-2':'Will moving to the cloud eliminate all infrastructure problems? What should the department consider first?'
+};
+const TALK={
+ '2-1':['Which two specifications matter most for the way Amir uses his laptop?','For the laptop you lean towards, which card turns orange or red? That is the sacrifice.'],
+ '2-2':['Set the sliders to Amir\'s normal use. Does Laptop B\'s extra cores change much?','Which number is missing from Table 1 that you would want to know?'],
+ '2-3':['Press Content creator mode. Which indicators move the most?','Is the same laptop still the most sensible one?'],
+ '3-1':['Find one benefit, one risk, and one row the department still owns in the cloud.','Which events go better with the cloud? Which go worse?'],
+ '3-2':['Look at the responsibility table: does the Department column become empty?','Trigger the internet outage and the bill events. What does that tell you?']
+};
+const TABS=$$('nav button');
+function showT(n,scroll){
+  const b=TABS[n], key=b.dataset.s+'-'+b.dataset.q;
+  TABS.forEach(x=>x.setAttribute('aria-selected',x===b));
+  $$('.lab').forEach(s=>s.hidden=s.id!==b.dataset.lab);
+  $('#focus').innerHTML=`<small>Scenario ${b.dataset.s} · Question ${b.dataset.q}</small>${QTEXT[key]}`;
+  if(TALK[key]){ const t=`<strong>Discuss with your partner</strong><ul>${TALK[key].map(x=>`<li>${x}</li>`).join('')}</ul>`; if(b.dataset.s==='2') $('#bTalk').innerHTML=t; else $('#cTalk').innerHTML=t; }
+  if(key==='2-3') setCreator(true);
+  $('#pager').innerHTML=(n>0?`<button class="btn ghost" id="prevT">Previous: ${TABS[n-1].querySelector('b').textContent}</button>`:'<span></span>')+(n<TABS.length-1?`<button class="btn" id="nextT">Next: ${TABS[n+1].querySelector('b').textContent}</button>`:'');
+  if(n>0) $('#prevT').onclick=()=>showT(n-1,true);
+  if(n<TABS.length-1) $('#nextT').onclick=()=>showT(n+1,true);
+  if(scroll){const top=$('#focus').getBoundingClientRect().top+scrollY-$('nav').offsetHeight-10; if(scrollY>top) scrollTo({top});}
+}
+TABS.forEach((b,i)=>b.addEventListener('click',()=>showT(i,true)));
+
+// ---------- S1 Q1: layers ----------
+const LAYERS=[
+ {k:'app',n:'Applications',c:'var(--sw)',items:['Word','Chrome','Spotify','Calculator']},
+ {k:'os',n:'Operating system',c:'var(--os)',items:['Scheduler','Memory manager','File system','Drivers']},
+ {k:'hw',n:'Hardware',c:'var(--hw)',items:['Keyboard','CPU','RAM','SSD','Wi-Fi','Speakers','Screen']}
+];
+$('#layers').innerHTML=LAYERS.map(l=>`<div class="layer" style="--c:${l.c}"><strong><i class="dot" style="background:${l.c}"></i>${l.n}</strong><div class="items">${l.items.map(i=>`<span class="pill" data-p="${i}" style="--c:${l.c}">${i}</span>`).join('')}</div></div>`).join('');
+const ACTS={
+ type:[['Keyboard','Airene presses a key: the keyboard sends an electrical signal.'],['Drivers','The keyboard driver turns the signal into a "key pressed" event.'],['Word','Word receives the letter and decides where it goes in the document.'],['CPU','The CPU runs Word\'s instructions to update the text.'],['RAM','The document being edited lives in RAM.'],['Screen','The new letter is drawn as pixels on the screen.']],
+ music:[['Spotify','Spotify asks for the next piece of the song.'],['Wi-Fi','The Wi-Fi card receives the data from the internet.'],['RAM','The song is buffered in RAM.'],['CPU','The CPU decodes the compressed audio.'],['Drivers','The sound driver passes the audio to the hardware.'],['Speakers','The speakers turn the signal into sound.']],
+ calc:[['Keyboard','Airene types 12 + 7.'],['Calculator','The Calculator app reads the numbers and the operation.'],['Scheduler','The OS gives the Calculator a turn on the CPU.'],['CPU','The CPU adds the two numbers (see S1 · Q2).'],['Screen','The answer 19 appears on the screen.']],
+ web:[['Chrome','Chrome asks for a web page.'],['Drivers','The network driver prepares the request.'],['Wi-Fi','The Wi-Fi card sends it and receives the page.'],['RAM','The page is stored in RAM.'],['CPU','The CPU runs the page\'s code and lays it out.'],['Screen','The page appears.']]
+};
+let actT=[];
+$$('[data-act]').forEach(b=>b.onclick=()=>{
+  actT.forEach(clearTimeout); actT=[]; $$('.pill').forEach(p=>p.classList.remove('lit'));
+  ACTS[b.dataset.act].forEach(([p,t],i)=>actT.push(setTimeout(()=>{
+    $$('.pill').forEach(x=>x.classList.remove('lit')); const el=$(`.pill[data-p="${p}"]`); if(el) el.classList.add('lit');
+    $('#a1info').innerHTML=`<b>Step ${i+1}.</b> ${t}`;
+  },i*1100)));
+});
+// RAM
+const APPS={OS:{gb:2.5,on:true,fixed:true},Word:{gb:0.6,on:true},Chrome:{gb:0.6,on:true},Spotify:{gb:0.4,on:true},Calculator:{gb:0.05,on:false},Zoom:{gb:1.2,on:false}};
+function drawRAM(){
+  const tabs=+$('#tabs').value; $('#tabsV').textContent=tabs;
+  $('#apps').innerHTML=Object.entries(APPS).filter(([k,a])=>!a.fixed).map(([k,a])=>`<button class="btn sm ${a.on?'on':'ghost'}" data-app="${k}">${a.on?'Close':'Open'} ${k}</button>`).join('');
+  $$('[data-app]').forEach(b=>b.onclick=()=>{APPS[b.dataset.app].on=!APPS[b.dataset.app].on;drawRAM()});
+  const parts=Object.entries(APPS).filter(([k,a])=>a.on).map(([k,a])=>[k,a.gb+(k==='Chrome'?tabs*0.25:0)]);
+  const tot=parts.reduce((s,p)=>s+p[1],0), cols={OS:'var(--os)',Word:'#2F6FDB',Chrome:'#2A9D8F',Spotify:'#2E8B57',Calculator:'#7B5EA7',Zoom:'#B5476B'};
+  const scale=Math.max(8,tot);
+  $('#ram').innerHTML=parts.map(([k,g])=>`<i title="${k}: ${g.toFixed(1)} GB" style="width:${g/scale*100}%;background:${cols[k]}"></i>`).join('');
+  const m=$('#ramMsg');
+  m.textContent=tot>8?`${tot.toFixed(1)} GB needed, 8 GB available. The OS moves data to the SSD and back: everything feels slower.`:`${tot.toFixed(1)} GB of 8 GB used.`;
+  m.style.color=tot>8?'var(--bad)':tot>6.8?'var(--warn)':'var(--ok)';
+}
+$('#tabs').oninput=drawRAM; drawRAM();
+
+// ---------- S1 Q2: fetch-decode-execute ----------
+let mem,pc,acc,ir,phase,done;
+const OPS={ADD:['+',(a,b)=>a+b],SUB:['−',(a,b)=>a-b],MUL:['×',(a,b)=>a*b]};
+function cpuReset(){
+  const a=+$('#na').value||0,b=+$('#nb').value||0,op=$('#op').value;
+  mem=[['LOAD 4','instr'],[`${op} 5`,'instr'],['STORE 6','instr'],['OUT 6','instr'],[a,'data'],[b,'data'],[0,'data']];
+  pc=0;acc=0;ir='–';phase=0;done=false;
+  $('#scr').textContent='0'; $('#cpuInfo').innerHTML='Press <b>Next step</b> to start.'; $('#step').disabled=false; lit([]); drawCPU();
+}
+function drawCPU(hi){
+  $('#memCells').innerHTML=mem.map((m,i)=>`<div class="cell ${hi===i?'lit':''}"><span>${i}</span><span>${m[0]}</span></div>`).join('');
+  $('#rPC').textContent=pc; $('#rIR').textContent=ir; $('#rACC').textContent=acc;
+}
+function lit(ids){['uMem','uCU','uALU','uOut'].forEach(u=>$('#'+u).classList.toggle('lit',ids.includes(u)))}
+function info(t){$('#cpuInfo').innerHTML=t}
+$('#step').onclick=()=>{
+  if(done) return;
+  if(phase===0){ ir=mem[pc][0]; lit(['uMem','uCU']); drawCPU(pc); info(`<b>Fetch.</b> The CU reads the instruction at address ${pc} from memory: "${ir}". PC moves to ${pc+1}.`); pc++; phase=1; $('#rOP').textContent='–'; drawCPU(pc-1); return; }
+  if(phase===1){ const [c,arg]=ir.split(' '); lit(['uCU']); drawCPU();
+    const d={LOAD:`copy the number at address ${arg} into the accumulator`,ADD:`add the number at address ${arg}`,SUB:`subtract the number at address ${arg}`,MUL:`multiply by the number at address ${arg}`,STORE:`write the accumulator into address ${arg}`,OUT:`send the value at address ${arg} to the screen`}[c];
+    info(`<b>Decode.</b> The CU works out what "${ir}" means: ${d}.`); phase=2; return; }
+  const [c,arg]=ir.split(' '), a=+arg;
+  if(c==='LOAD'){acc=mem[a][0]; lit(['uMem','uALU']); drawCPU(a); info(`<b>Execute.</b> The value ${acc} travels from memory into the ALU's accumulator.`);}
+  else if(OPS[c]){const old=acc; acc=OPS[c][1](acc,mem[a][0]); $('#rOP').textContent=`${old} ${OPS[c][0]} ${mem[a][0]}`; lit(['uMem','uALU']); drawCPU(a); info(`<b>Execute.</b> The ALU computes ${old} ${OPS[c][0]} ${mem[a][0]} = ${acc}.`);}
+  else if(c==='STORE'){mem[a][0]=acc; lit(['uALU','uMem']); drawCPU(a); info(`<b>Execute.</b> The result ${acc} is written back to memory, at address ${a}.`);}
+  else if(c==='OUT'){$('#scr').textContent=mem[a][0]; lit(['uMem','uOut']); drawCPU(a); info(`<b>Execute.</b> The result goes from memory to the display. Program finished.`); done=true; $('#step').disabled=true;}
+  phase=0;
+};
+$('#cpuReset').onclick=cpuReset; ['#na','#nb','#op'].forEach(s=>$(s).onchange=cpuReset); cpuReset();
+
+// ---------- S1 Q3: cores ----------
+const TASKS=[
+ {n:'Calculator sum',p:0,base:1,u:'ms',note:'A single small calculation: one step after another, nothing to share.'},
+ {n:'Many apps open',p:.7,base:10,u:'s',note:'Each app can run on its own core, but they still share memory and the disk.'},
+ {n:'Export a video',p:.95,base:120,u:'s',note:'Video frames can be processed in parallel, so most of the work can be split.'},
+ {n:'Download a file',p:0,base:30,u:'s',note:'The time depends on the internet connection, not on the CPU.'}
+];
+let task=0;
+$('#tasks').innerHTML=TASKS.map((t,i)=>`<button class="btn sm ${i===0?'on':'ghost'}" data-t="${i}">${t.n}</button>`).join('');
+$$('[data-t]').forEach(b=>b.onclick=()=>{task=+b.dataset.t;$$('[data-t]').forEach(x=>x.className='btn sm '+(x===b?'on':'ghost'));drawCores()});
+function tTime(t,c,rf){return t.base*((1-t.p)+t.p/c)*(rf&&t.n!=='Download a file'?2.2:1)}
+function drawCores(){
+  const c=+$('#cores').value, t=TASKS[task], rf=$('#ramFull').checked; $('#coresV').textContent=c; $('#taskNote').textContent=t.note;
+  const list=[1,2,4,8,12,16], max=tTime(t,1,rf);
+  $('#coreBars').innerHTML=list.map(k=>{const v=tTime(t,k,rf);return `<div class="bar ${k===c?'cur':''}"><span>${k} core${k>1?'s':''}</span><div class="track"><i style="width:${v/max*100}%;background:${k===c?'var(--sw)':'var(--muted)'}"></i></div><span>${v<10?v.toFixed(1):Math.round(v)} ${t.u}</span></div>`}).join('')+
+   (list.includes(c)?'':`<div class="bar cur"><span>${c} cores</span><div class="track"><i style="width:${tTime(t,c,rf)/max*100}%;background:var(--sw)"></i></div><span>${Math.round(tTime(t,c,rf)*10)/10} ${t.u}</span></div>`);
+}
+$('#cores').oninput=drawCores; $('#ramFull').onchange=drawCores; drawCores();
+
+// ---------- S2: laptops ----------
+const LAPS=[
+ {n:'Laptop A',price:2899,cores:8,ram:8,ssd:512,gpu:false,bat:14},
+ {n:'Laptop B',price:3699,cores:12,ram:16,ssd:512,gpu:false,bat:10},
+ {n:'Laptop C',price:3999,cores:8,ram:16,ssd:1000,gpu:true,bat:6}
+];
+function tag(level,txt){const c={ok:'var(--ok)',warn:'var(--warn)',bad:'var(--bad)'}[level];return `<span class="tag" style="background:${c}">${txt}</span>`}
+function setCreator(on){ if(on){$('#u_apps').value=10;$('#u_unplug').value=3;$('#u_video').value=25;$('#u_res').value='2.5';} drawLaps(); }
+$('#creator').onclick=()=>setCreator(true);
+$('#student').onclick=()=>{$('#u_apps').value=6;$('#u_unplug').value=5;$('#u_video').value=1;$('#u_res').value='1';drawLaps()};
+function drawLaps(){
+  const apps=+$('#u_apps').value, unplug=+$('#u_unplug').value, video=+$('#u_video').value, res=+$('#u_res').value;
+  $('#u_appsV').textContent=apps; $('#u_unplugV').textContent=unplug+' h'; $('#u_videoV').textContent=video+' h';
+  const ramNeed=3+apps*0.6+(video>0?2.4*res:0);
+  const videoShare=Math.min(1,video/35);
+  $('#laps').innerHTML=LAPS.map(l=>{
+    const left=4000-l.price;
+    const headroom=l.ram-ramNeed;
+    const realBat=l.bat*0.6*(1-0.55*videoShare*(res>1?1.2:1));
+    const exp=60*res*(0.15+0.85/(l.cores/4))*(l.gpu?0.35:1)/ (l.ram>=ramNeed?1:0.6);
+    const store=60+video*52*4*0.15*res;
+    return `<div class="lap"><h4>${l.n}</h4><div class="spec">RM${l.price.toLocaleString()} · ${l.cores} cores · ${l.ram} GB · ${l.ssd>=1000?'1 TB':l.ssd+' GB'} · ${l.gpu?'dedicated GPU':'integrated'} · ${l.bat} h</div>
+     <div class="ind"><span>Money left</span>${tag(left>=800?'ok':left>=200?'warn':'bad','RM'+left)}</div>
+     <div class="ind"><span>Memory headroom</span>${tag(headroom>=3?'ok':headroom>=0?'warn':'bad',(headroom>=0?'+':'')+headroom.toFixed(1)+' GB')}</div>
+     <div class="ind"><span>Real battery</span>${tag(realBat>=unplug+1?'ok':realBat>=unplug?'warn':'bad','~'+realBat.toFixed(1)+' h')}</div>
+     <div class="ind"><span>10-min video export</span>${tag(video===0?'ok':exp<=25?'ok':exp<=50?'warn':'bad',video===0?'not used':'~'+Math.round(exp)+' min')}</div>
+     <div class="ind"><span>Storage after 4 years</span>${tag(store<=l.ssd*0.7?'ok':store<=l.ssd?'warn':'bad','~'+Math.round(store)+' GB')}</div></div>`;
+  }).join('');
+}
+['#u_apps','#u_unplug','#u_video'].forEach(s=>$(s).oninput=drawLaps); $('#u_res').onchange=drawLaps; drawLaps();
+
+// ---------- S3: cloud ----------
+const RESP=[
+ ['Buildings, power, cooling','D','P','P'],
+ ['Physical servers and disks','D','P','P'],
+ ['Operating system and security patches','D','D','P'],
+ ['Storage software and backups','D','S','P'],
+ ['The applications students use','D','D','P'],
+ ['Campus internet connection','D','D','D'],
+ ['User accounts, passwords, who can see what','D','D','D'],
+ ['Rules for student data and privacy','D','D','D'],
+ ['Paying the bill and watching costs','D','D','D']
+];
+const W={D:['Department','dept'],P:['Provider','prov'],S:['Shared','shared']};
+let col=0;
+function drawResp(){
+  $('#resp').innerHTML='<tr><th>Part of the system</th><th>Local servers</th><th>Cloud servers (IaaS)</th><th>Cloud apps (SaaS)</th></tr>'+
+   RESP.map(r=>`<tr><td>${r[0]}</td>${[1,2,3].map(i=>`<td class="who ${W[r[i]][1]} ${col&&col!==i?'col-dim':''}">${W[r[i]][0]}</td>`).join('')}</tr>`).join('');
+  $$('[data-col]').forEach(b=>b.className='btn sm '+(+b.dataset.col===col?'on':'ghost'));
+}
+$$('[data-col]').forEach(b=>b.onclick=()=>{col=+b.dataset.col;drawResp()}); drawResp();
+const EV=[
+ ['A server disk fails','The department must notice, buy a part and repair it. Files may be unavailable for hours or days.','The provider replaces the hardware, usually without users noticing. Files stay available if storage is configured with copies.'],
+ ['A student works from home','Access needs a VPN or special setup; if the server is slow or down, the student is stuck.','Files are reachable from any device with internet and a login.'],
+ ['Campus internet goes down','Students on campus can still reach the local server over the internal network.','Nobody on campus can reach the files until the connection is back.'],
+ ['Submission deadline traffic','The local server may slow down or crash under the sudden load.','The service can add capacity during the peak, at extra cost.'],
+ ['A lecturer\'s password is stolen','The attacker can reach the files the account allows. The department must react.','Exactly the same: accounts and access remain the department\'s job.'],
+ ['Five years later: the bill','Large costs every few years to replace servers, plus staff time for maintenance.','A monthly bill that grows with storage and users. Leaving the provider can be costly.'],
+ ['The provider has an outage','Not affected.','Files are unavailable until the provider fixes it; the department can only wait.'],
+ ['New data protection rules','The department adapts its own setup.','The department must check where the data is stored and whether the provider complies.']
+];
+$('#events').innerHTML=EV.map((e,i)=>`<button class="btn sm ghost" data-ev="${i}">${e[0]}</button>`).join('');
+$$('[data-ev]').forEach(b=>b.onclick=()=>{const e=EV[+b.dataset.ev];$$('[data-ev]').forEach(x=>x.className='btn sm '+(x===b?'on':'ghost'));
+  $('#oLocal').textContent=e[1];$('#oLocal').className='';$('#oCloud').textContent=e[2];$('#oCloud').className='';});
+
+
+// ---------- 6-second scene intros ----------
+const D=s=>`style="animation-delay:${s}s"`;
+const SCENES={
+1:{t:'Scenario 1: Airene\'s laptop',caps:[[0,'Airene is working on her assignment…'],[1.2,'Word, Chrome, Spotify… all open at once.'],[3.2,'She opens the Calculator. Everything slows down.'],[4.6,'Her friend has an idea…']],svg:`
+<svg viewBox="0 0 600 230" role="img" aria-label="Airene's laptop slowing down as she opens more applications">
+ <rect x="150" y="20" width="300" height="175" rx="10" fill="var(--soft)" stroke="var(--ink)" stroke-width="3"/>
+ <rect x="120" y="195" width="360" height="14" rx="5" fill="var(--ink)"/>
+ <g class="an" ${D(0.6)}><rect x="165" y="35" width="120" height="70" rx="5" fill="#2F6FDB"/><text x="225" y="76" text-anchor="middle" fill="#fff" style="fill:#fff" font-weight="700">Word</text></g>
+ <g class="an" ${D(1.2)}><rect x="235" y="70" width="120" height="70" rx="5" fill="#2A9D8F"/><text x="295" y="100" text-anchor="middle" style="fill:#fff" font-weight="700">Chrome</text><text x="295" y="120" text-anchor="middle" style="fill:#fff" font-size="13">12 tabs</text></g>
+ <g class="an" ${D(1.8)}><rect x="330" y="32" width="105" height="55" rx="5" fill="#2E8B57"/><text x="382" y="65" text-anchor="middle" style="fill:#fff" font-weight="700">Spotify ♪</text></g>
+ <g class="an" ${D(3.0)}><rect x="168" y="118" width="62" height="62" rx="5" fill="#7B5EA7"/><text x="199" y="154" text-anchor="middle" style="fill:#fff" font-weight="700">12 + 7</text></g>
+ <text x="20" y="40" font-size="13" font-weight="700">RAM</text>
+ <rect x="20" y="48" width="100" height="14" rx="4" fill="var(--soft)" stroke="var(--line)"/>
+ <rect x="20" y="48" height="14" rx="4" fill="var(--warn)" style="--w:100px;width:0;animation:fill 3s 0.6s ease-in forwards,redden .3s 3.4s forwards"/>
+ <g class="fd" ${D(3.4)} style="animation-delay:3.4s"><circle cx="310" cy="165" r="12" fill="none" stroke="var(--ink)" stroke-width="4" stroke-dasharray="60 30" style="transform-box:fill-box;transform-origin:center;animation:spin 1s linear infinite"/><text x="328" y="170" font-size="14" font-weight="700">Not responding…</text></g>
+ <g class="an" ${D(4.6)}><rect x="465" y="70" width="128" height="62" rx="12" fill="var(--panel)" stroke="var(--ink)" stroke-width="2"/><path d="M480 132 l-10 18 l24 -18z" fill="var(--panel)" stroke="var(--ink)" stroke-width="2"/><text x="529" y="96" text-anchor="middle" font-size="13" font-weight="700">"Buy more</text><text x="529" y="114" text-anchor="middle" font-size="13" font-weight="700">CPU cores!"</text></g>
+</svg>`},
+2:{t:'Scenario 2: Amir\'s laptop',caps:[[0,'Amir has saved RM4,000 for a laptop.'],[1.4,'Three laptops on his shortlist.'],[3.4,'Cheaper? More cores? Better graphics?'],[4.6,'His friend is sure of the answer…']],svg:`
+<svg viewBox="0 0 600 230" role="img" aria-label="Amir comparing three laptops with RM4,000">
+ <g class="an" ${D(0.2)}><circle cx="60" cy="70" r="22" fill="var(--hw)"/><rect x="38" y="96" width="44" height="70" rx="14" fill="var(--hw)"/><text x="60" y="190" text-anchor="middle" font-weight="700">Amir</text></g>
+ <g class="an" ${D(0.7)}><rect x="20" y="198" width="82" height="26" rx="6" fill="var(--ok)"/><text x="61" y="216" text-anchor="middle" style="fill:#fff" font-weight="700">RM4,000</text></g>
+ ${[['A','RM2,899','8 GB · 14 h',1.4],['B','RM3,699','12 cores',2.0],['C','RM3,999','GPU · 1 TB',2.6]].map(([n,p,s,t],i)=>`
+ <g class="an" ${D(t)}><rect x="${150+i*140}" y="60" width="110" height="70" rx="6" fill="var(--soft)" stroke="var(--ink)" stroke-width="2.5"/><rect x="${140+i*140}" y="130" width="130" height="9" rx="3" fill="var(--ink)"/>
+ <text x="${205+i*140}" y="100" text-anchor="middle" font-size="24" font-weight="800">${n}</text>
+ <text x="${205+i*140}" y="160" text-anchor="middle" font-weight="700">${p}</text><text x="${205+i*140}" y="180" text-anchor="middle" font-size="13">${s}</text></g>`).join('')}
+ <g class="fd" style="animation-delay:3.4s"><text x="110" y="60" font-size="34" font-weight="800" style="fill:var(--sw)">?</text><text x="128" y="40" font-size="24" font-weight="800" style="fill:var(--sw)">?</text></g>
+ <g class="an" ${D(4.6)}><rect x="300" y="190" width="230" height="34" rx="12" fill="var(--panel)" stroke="var(--ink)" stroke-width="2"/><text x="415" y="212" text-anchor="middle" font-size="14" font-weight="700">"Most cores = best performance!"</text></g>
+</svg>`},
+3:{t:'Scenario 3: The school\'s servers',caps:[[0,'The School\'s own servers hold every assignment.'],[1.6,'Slow… then unavailable.'],[3.0,'A student at home cannot reach her files.'],[4.4,'Encik Azman: "Move everything to the cloud!"']],svg:`
+<svg viewBox="0 0 600 230" role="img" aria-label="School servers failing and a proposal to move to the cloud">
+ <g class="an" ${D(0.2)}><rect x="40" y="40" width="110" height="150" rx="8" fill="var(--soft)" stroke="var(--ink)" stroke-width="3"/>
+  ${[0,1,2,3].map(i=>`<rect x="55" y="${55+i*33}" width="80" height="22" rx="3" fill="var(--panel)" stroke="var(--line)"/><circle cx="123" cy="${66+i*33}" r="4" fill="var(--ok)" style="animation:blink .5s ${i*.12}s 4,redden .2s 1.8s forwards"/>`).join('')}
+  <text x="95" y="210" text-anchor="middle" font-weight="700">Local server</text></g>
+ <g class="fd" style="animation-delay:1.8s"><text x="160" y="70" font-size="40" font-weight="800" style="fill:var(--bad)">✕</text></g>
+ <g class="an" ${D(3.0)}><rect x="230" y="110" width="130" height="78" rx="6" fill="var(--soft)" stroke="var(--ink)" stroke-width="2.5"/><rect x="220" y="188" width="150" height="9" rx="3" fill="var(--ink)"/>
+  <text x="295" y="145" text-anchor="middle" font-size="13" font-weight="700" style="fill:var(--bad)">Server</text><text x="295" y="163" text-anchor="middle" font-size="13" font-weight="700" style="fill:var(--bad)">unavailable</text>
+  <text x="295" y="215" text-anchor="middle" font-size="13">Student at home</text></g>
+ <g class="an" ${D(4.4)}><path d="M440 110 a28 28 0 0 1 52 -14 a24 24 0 0 1 44 14 a22 22 0 0 1 -4 44 h-88 a22 22 0 0 1 -4 -44z" fill="var(--sw)"/><text x="488" y="140" text-anchor="middle" style="fill:#fff" font-weight="800">Cloud</text>
+  <rect x="400" y="20" width="190" height="44" rx="12" fill="var(--panel)" stroke="var(--ink)" stroke-width="2"/><text x="495" y="39" text-anchor="middle" font-size="13" font-weight="700">"Cloud is the future.</text><text x="495" y="56" text-anchor="middle" font-size="13" font-weight="700">No more IT worries!"</text></g>
+</svg>`}
+};
+let sceneT=[],curScene=0;
+function playScene(n){
+  const s=SCENES[n]; curScene=n; sceneT.forEach(clearTimeout); sceneT=[];
+  $('#sceneT').textContent=s.t; $('#sceneSvg').innerHTML=s.svg;
+  s.caps.forEach(([t,c])=>sceneT.push(setTimeout(()=>$('#sceneCap').textContent=c,t*1000)));
+}
+$('#replay').onclick=()=>playScene(curScene);
+const _showT=showT;
+showT=function(n,scroll){ const sc=+TABS[n].dataset.s; _showT(n,scroll); if(sc!==curScene) playScene(sc); };
+TABS.forEach((b,i)=>b.onclick=null);
+showT(0,false);
+</script>
+</body>
+</html>
+
+</body></html>
